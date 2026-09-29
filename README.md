@@ -1,5 +1,10 @@
 # 🎬 CineFlix — Recomendador de Filmes com TensorFlow.js
 
+> **🔗 Links**
+> - **Produção (Vercel):** https://recomendador-de-filmes-rho.vercel.app
+> - **Código (GitHub):** https://github.com/Hugueninfer/cineflix-recomendador
+> - Deploy automático: cada push na `main` publica uma nova versão na produção.
+
 Projeto pessoal fiel à versão **gabarito `-z`** do
 `exemplo-01-ecommerce-recomendations` do módulo 01 da UNIPDS:
 uma aplicação web com **MVC + event bus** que treina uma **rede neural
