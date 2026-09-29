@@ -1,3 +1,5 @@
+import Events from '../events/events.js';
+import { t } from '../i18n/i18n.js';
 import { ExplainService } from '../service/ExplainService.js';
 
 // Controller do treinamento: conecta os botões da UI aos eventos do worker.
@@ -28,11 +30,7 @@ export class ModelTrainingController {
         this.setupCallbacks();
 
         // Hero com um filme em destaque enquanto o modelo não treinou
-        this.#movieService.getMovies().then(movies => {
-            if (movies.length) {
-                this.#view.updateHero(movies[0], 'PRÉVIA');
-            }
-        });
+        this.#setupInitialHero();
 
         // Lembra o usuário selecionado
         this.#events.onUserSelected((user) => {
@@ -85,8 +83,7 @@ export class ModelTrainingController {
         });
 
         // Estado inicial
-        this.#view.renderStats('Pronto para treinar o modelo com ' +
-            `os dados de ${this.#getTrainingInfo()}.`);
+        this.#refreshStats();
     }
 
     setupCallbacks() {
@@ -94,20 +91,28 @@ export class ModelTrainingController {
         this.#view.registerRunRecommendationCallback(this.handleRunRecommendation.bind(this));
     }
 
-    async #getTrainingInfo() {
-        try {
-            const movies = await this.#movieService.getMovies();
-            const users = await this.#userService.getUsers();
-            const comHistorico = users.filter(u => (u.watched || []).length).length;
-            return `${comHistorico} usuários com histórico e ${movies.length} filmes`;
-        } catch {
-            return 'usuários e filmes';
+    async #setupInitialHero() {
+        const movies = await this.#movieService.getMovies();
+        if (movies.length) {
+            this.#view.updateHero(movies[0], t('hero.badge.preview'));
         }
+    }
+
+    async #getDatasetInfo() {
+        const movies = await this.#movieService.getMovies();
+        const users = await this.#userService.getUsers();
+        const comHistorico = users.filter(u => (u.watched || []).length).length;
+        return { users: comHistorico, movies: movies.length };
+    }
+
+    async #refreshStats() {
+        const { users, movies } = await this.#getDatasetInfo();
+        this.#view.renderStats(t('stats.readyDetail', { users, movies }));
     }
 
     async handleTrainModel() {
         if (this.#alreadyTrained) {
-            this.#view.renderStats('Modelo já treinado! Clique em "Recomendar".');
+            this.#view.renderStats(t('stats.alreadyTrained'));
             return;
         }
 
@@ -121,19 +126,20 @@ export class ModelTrainingController {
             watched: movies.filter(movie => (user.watched || []).includes(movie.id)),
         }));
 
-        this.#view.renderStats(
-            `Treinando a rede neural com ${usersWithMovies.length} usuários e ${movies.length} filmes...`
-        );
+        this.#view.renderStats(t('stats.trainingWith', {
+            users: usersWithMovies.length,
+            movies: movies.length,
+        }));
         this.#events.dispatchTrainModel(usersWithMovies);
     }
 
     async handleRunRecommendation() {
         if (!this.#currentUser) {
-            this.#view.renderStats('Selecione um usuário primeiro. 🙂');
+            this.#view.renderStats(t('stats.selectUser'));
             return;
         }
         if (!this.#alreadyTrained) {
-            this.#view.renderStats('Treine o modelo primeiro. 🧠');
+            this.#view.renderStats(t('stats.trainFirst'));
             return;
         }
 
@@ -145,5 +151,20 @@ export class ModelTrainingController {
         };
 
         this.#events.dispatchRecommend(userWithMovies);
+    }
+
+    // Chamado ao trocar o idioma: recalcula textos e redesenha as recomendações
+    async refreshLanguage() {
+        if (this.#alreadyTrained) {
+            this.#view.updateTrainingProgress({ progress: 100 });
+        }
+        if (this.#currentUser) {
+            this.#view.updateActiveProfile(this.#currentUser);
+        }
+        await this.#refreshStats();
+        await this.#setupInitialHero();
+        if (this.#alreadyTrained && this.#currentUser) {
+            await this.handleRunRecommendation();
+        }
     }
 }

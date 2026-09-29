@@ -45,4 +45,10 @@ export class MovieController {
         const user = await this.#userService.getUserById(this.#currentUser.id);
         this.#events.dispatchMovieWatched({ user, movie });
     }
+
+    // Re-renderiza o catálogo (útil ao trocar o idioma)
+    async refreshCatalog() {
+        const movies = await this.#movieService.getMovies();
+        this.#view.render(movies, !this.#currentUser);
+    }
 }

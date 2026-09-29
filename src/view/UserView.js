@@ -1,4 +1,5 @@
 import { View } from './View.js';
+import { t } from '../i18n/i18n.js';
 
 // View do perfil do usuário: dropdown, idade e lista "Já assistidos".
 // Mesma função da UserView do template do módulo.
@@ -34,7 +35,8 @@ export class UserView extends View {
             return `<option value="${user.id}">${user.name}</option>`;
         }).join('');
 
-        this.#userSelect.innerHTML = '<option value="">-- Selecione --</option>' + options;
+        this.#userSelect.innerHTML =
+            `<option value="">${t('nav.selectPlaceholder')}</option>` + options;
 
         // Deixa o primeiro perfil já selecionado: a app já nasce pronta
         if (users.length > 0) {
@@ -51,13 +53,14 @@ export class UserView extends View {
 
         if (!watchedMovies || watchedMovies.length === 0) {
             this.#watchedList.innerHTML =
-                '<p class="text-muted mb-0">Nenhum filme assistido ainda.</p>';
+                `<p class="text-muted mb-0">${t('empty.watched')}</p>`;
             return;
         }
 
         const html = watchedMovies.map(movie => {
             return this.replaceTemplate(this.#watchedTemplate, {
                 title: movie.title,
+                removeBtn: t('catalog.remove'),
                 movie: JSON.stringify(movie)
             });
         }).join('');
@@ -67,12 +70,15 @@ export class UserView extends View {
     }
 
     addWatched(movie) {
-        if (this.#watchedList.innerHTML.includes('Nenhum filme')) {
-            this.#watchedList.innerHTML = '';
+        // Limpa a mensagem de "nenhum filme assistido" se estiver visível
+        const emptyMsg = this.#watchedList.querySelector('p.text-muted');
+        if (emptyMsg) {
+            emptyMsg.remove();
         }
 
         const html = this.replaceTemplate(this.#watchedTemplate, {
             title: movie.title,
+            removeBtn: t('catalog.remove'),
             movie: JSON.stringify(movie)
         });
         this.#watchedList.insertAdjacentHTML('afterbegin', html);

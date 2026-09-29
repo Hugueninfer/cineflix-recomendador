@@ -1,4 +1,5 @@
 import { View } from './View.js';
+import { t } from '../i18n/i18n.js';
 
 // Gradientes por gênero usados nos "posters" (nenhuma imagem externa).
 const GENRE_GRADIENTS = {
@@ -55,6 +56,8 @@ export class MovieView extends View {
                 year: movie.year,
                 rating: movie.rating,
                 gradient: genreGradient(movie.genre),
+                ratingLabel: t('catalog.rating'),
+                watchBtn: t('catalog.watch'),
                 movie: JSON.stringify(movie)
             });
         }).join('');
@@ -79,11 +82,11 @@ export class MovieView extends View {
             button.addEventListener('click', () => {
                 const movie = JSON.parse(button.dataset.movie);
 
-                button.innerText = '✓ Assistido';
+                button.innerText = t('catalog.watched');
                 button.style.backgroundColor = '#22c55e';
                 button.style.color = '#ffffff';
                 setTimeout(() => {
-                    button.innerText = 'Assistir';
+                    button.innerText = t('catalog.watch');
                     button.style.backgroundColor = '';
                     button.style.color = '';
                 }, 800);

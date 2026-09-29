@@ -222,7 +222,7 @@ async function trainModel({ users }) {
     console.log('Treinando modelo com usuários:', users);
     postMessage({ type: workerEvents.progressUpdate, progress: { progress: 1 } });
 
-    const movies = await (await fetch('/data/movies.json')).json();
+    const movies = await (await fetch('../../data/movies.json')).json();
     const context = makeContext(movies, users);
     context.movieVectors = movies.map(movie => ({
         title: movie.title,

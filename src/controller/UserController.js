@@ -7,6 +7,7 @@ export class UserController {
     #userService;
     #movieService;
     #events;
+    #currentUserId = null;
 
     constructor({ userView, userService, movieService, events }) {
         this.#view = userView;
@@ -47,9 +48,19 @@ export class UserController {
     }
 
     async handleUserSelect(userId) {
+        this.#currentUserId = userId;
         const user = await this.#userService.getUserById(userId);
         this.#events.dispatchUserSelected(user);
         return this.displayUserDetails(user);
+    }
+
+    // Re-renderiza o perfil atual (útil ao trocar o idioma)
+    async refreshUserUI() {
+        if (!this.#currentUserId) return;
+        const user = await this.#userService.getUserById(this.#currentUserId);
+        if (user) {
+            return this.displayUserDetails(user);
+        }
     }
 
     async handleWatchedAdded({ user, movie }) {

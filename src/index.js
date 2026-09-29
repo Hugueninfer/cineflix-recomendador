@@ -8,6 +8,7 @@ import { UserView } from './view/UserView.js';
 import { MovieView } from './view/MovieView.js';
 import { ModelTrainingView } from './view/ModelTrainingView.js';
 import Events from './events/events.js';
+import { i18n } from './i18n/i18n.js';
 
 // ============================================================
 // Ponto de entrada — monta tudo, igual ao template do módulo.
@@ -23,21 +24,21 @@ const movieView = new MovieView();
 const modelView = new ModelTrainingView();
 
 // 3) Web Worker que roda o TensorFlow.js fora da thread principal
-const mlWorker = new Worker('/src/workers/modelTrainingWorker.js', { type: 'module' });
+const mlWorker = new Worker('./src/workers/modelTrainingWorker.js', { type: 'module' });
 const workerController = WorkerController.init({
     worker: mlWorker,
     events: Events,
 });
 
 // 4) Controllers (cada um recebe o que precisa)
-ModelTrainingController.init({
+const modelController = ModelTrainingController.init({
     modelTrainingView: modelView,
     userService,
     movieService,
     events: Events,
 });
 
-MovieController.init({
+const movieController = MovieController.init({
     movieView,
     userService,
     movieService,
@@ -51,7 +52,29 @@ const userController = UserController.init({
     events: Events,
 });
 
-// 5) Carrega usuários e já treina o modelo automaticamente (como o gabarito)
+// 5) Seletor de idioma (PT/EN)
+const langToggle = document.querySelector('#langToggle');
+const updateLangToggle = () => {
+    langToggle.innerText = i18n.isEnglish() ? 'PT 🇧🇷' : 'EN 🇺🇸';
+};
+
+async function refreshAfterLanguageChange() {
+    await userController.refreshUserUI();
+    await movieController.refreshCatalog();
+    await modelController.refreshLanguage();
+}
+
+langToggle.addEventListener('click', async () => {
+    i18n.setLang(i18n.isEnglish() ? 'pt' : 'en');
+    updateLangToggle();
+    await refreshAfterLanguageChange();
+});
+updateLangToggle();
+
+// Aplica traduções nos textos estáticos com data-i18n
+i18n.apply(document);
+
+// 6) Carrega usuários e já treina o modelo automaticamente (como o gabarito)
 (async () => {
     const users = await userService.getDefaultUsers();
     const movies = await movieService.getMovies();

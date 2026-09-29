@@ -1,6 +1,9 @@
 // Serviço que explica POR QUE um filme foi recomendado,
 // comparando diretamente com a base de dados do usuário
 // (os filmes que ele já assistiu) e com os pesos da rede neural TF.js.
+//
+// Cada motivo é devolvido como { key, params } para o i18n traduzir
+// na língua atual (pt/en).
 export class ExplainService {
 
     explain(movie, watchedMovies = [], allUsers = [], currentUser = null) {
@@ -8,30 +11,28 @@ export class ExplainService {
 
         // Sem histórico: o modelo só usou a idade do usuário
         if (!watchedMovies || watchedMovies.length === 0) {
-            reasons.push({
-                text: 'Você ainda não tem histórico assistido, então o modelo usou apenas a sua idade para estimar o gosto (peso 0.1).',
-            });
-            reasons.push({
-                text: 'Assista a alguns filmes para a recomendação ficar cada vez mais personalizada.',
-            });
+            reasons.push({ key: 'explain.noHistory1', params: {} });
+            reasons.push({ key: 'explain.noHistory2', params: {} });
             return reasons;
         }
 
         // 1) Sinal colaborativo: o que OS OUTROS USUÁRIOS assistiram (item-item)
         const itemItem = this.#itemItemReason(movie, watchedMovies, allUsers, currentUser);
         if (itemItem) {
-            reasons.push({ text: itemItem.text });
+            reasons.push(itemItem);
         }
 
         // 2) Gênero — o sinal mais forte (peso 0.4 no modelo)
         const sameGenre = watchedMovies.filter(w => w.genre === movie.genre);
         if (sameGenre.length > 0) {
             reasons.push({
-                text: `Compartilha gênero com ${sameGenre.slice(0, 3).map(w => `"${w.title}"`).join(', ')} — o gênero tem o maior peso no modelo (0.4).`,
+                key: 'explain.genre',
+                params: { titles: sameGenre.slice(0, 3).map(w => `"${w.title}"`).join(', ') },
             });
         } else {
             reasons.push({
-                text: `Nenhum filme do seu histórico é ${movie.genre.toLowerCase()}, mas o modelo ainda achou o perfil compatível por outros fatores.`,
+                key: 'explain.genreNone',
+                params: { genre: movie.genre.toLowerCase() },
             });
         }
 
@@ -43,11 +44,13 @@ export class ExplainService {
         if (closeRating.length > 0) {
             const top = closeRating[0];
             reasons.push({
-                text: `Nota parecida com "${top.title}" (${movie.rating} vs ${top.rating}) — a nota tem peso 0.3 no modelo.`,
+                key: 'explain.rating',
+                params: { a: movie.rating, b: top.rating, m: top.title },
             });
         } else {
             reasons.push({
-                text: `Nota (${movie.rating}) foge um pouco da média que você costuma assistir — o modelo ponderou isso (peso 0.3).`,
+                key: 'explain.ratingNone',
+                params: { a: movie.rating },
             });
         }
 
@@ -59,11 +62,13 @@ export class ExplainService {
         if (closeYear.length > 0) {
             const top = closeYear[0];
             reasons.push({
-                text: `Época parecida com "${top.title}" (${movie.year} vs ${top.year}) — o ano tem peso 0.2.`,
+                key: 'explain.year',
+                params: { a: movie.year, b: top.year, m: top.title },
             });
         } else {
             reasons.push({
-                text: `É de ${movie.year}, uma época diferente do seu histórico — o peso 0.2 do ano influenciou menos.`,
+                key: 'explain.yearNone',
+                params: { a: movie.year },
             });
         }
 
@@ -74,7 +79,7 @@ export class ExplainService {
     // ITEM-ITEM (filtro colaborativo na base): para cada filme que o usuário
     // já assistiu, conta quantos OUTROS usuários também assistiram ao filme
     // recomendado, e mostra o padrão mais forte.
-    // Ex.: "2 de 3 usuários que assistiram 'Matrix' também assistiram 'A Origem'."
+    // Ex.: "2 de 2 usuários que assistiram 'Matrix' também assistiram 'A Origem'."
     // ====================================================================
     #itemItemReason(movie, watchedMovies, allUsers, currentUser) {
         const others = (allUsers || []).filter(u => u && u.id !== (currentUser && currentUser.id));
@@ -100,12 +105,19 @@ export class ExplainService {
 
         if (!best) {
             return {
-                text: `Nenhum outro usuário da base assistiu "${movie.title}" ainda — a recomendação vem das features do perfil (gênero/nota/ano).`,
+                key: 'explain.itemItemNone',
+                params: { m: movie.title },
             };
         }
 
         return {
-            text: `Padrão entre usuários: ${best.also} de ${best.viewers} usuários que assistiram "${best.watched.title}" também assistiram "${movie.title}" — influência dos outros perfis da base.`,
+            key: 'explain.itemItem',
+            params: {
+                x: best.also,
+                y: best.viewers,
+                w: best.watched.title,
+                m: movie.title,
+            },
         };
     }
 }

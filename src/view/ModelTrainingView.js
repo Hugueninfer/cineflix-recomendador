@@ -1,4 +1,5 @@
 import { View } from './View.js';
+import { t } from '../i18n/i18n.js';
 
 // Gradientes por gênero usados nos "posters" da recomendação e no hero.
 const GENRE_GRADIENTS = {
@@ -88,8 +89,8 @@ export class ModelTrainingView extends View {
         this.#progressBar.style.width = `${progress}%`;
         this.#progressBar.innerText = `${progress}%`;
         this.#progressLabel.innerText = progress >= 100
-            ? 'Treinamento completo! ✅'
-            : `Treinando na web worker... ${progress}%`;
+            ? t('panels.progressDone')
+            : t('panels.progressTraining', { p: progress });
     }
 
     enableRecommendButton() {
@@ -103,20 +104,20 @@ export class ModelTrainingView extends View {
     addTrainingLog({ epoch, loss, accuracy }) {
         const row = document.createElement('div');
         row.className = 'training-log-row d-flex justify-content-between border-bottom py-1 px-1';
-        row.innerHTML = `<span>Época ${epoch + 1}</span>` +
-            `<span>loss ${Number(loss).toFixed(4)}</span>` +
-            `<span>acc ${(Number(accuracy) * 100).toFixed(1)}%</span>`;
+        row.innerHTML = `<span>${t('log.epoch', { n: epoch + 1 })}</span>` +
+            `<span>${t('log.loss', { v: Number(loss).toFixed(4) })}</span>` +
+            `<span>${t('log.acc', { v: (Number(accuracy) * 100).toFixed(1) + '%' })}</span>`;
         this.#trainingLogs.prepend(row);
     }
 
     // Atualiza o hero (destaque no topo da página)
-    updateHero(movie, badge = 'PRÉVIA') {
+    updateHero(movie, badge = t('hero.badge.preview')) {
         if (!movie) return;
 
         this.#heroBadge.innerText = badge;
         this.#heroTitle.innerText = movie.title;
         this.#heroMeta.innerText =
-            `${movie.genre} · ${movie.year} · nota ${movie.rating}`;
+            `${movie.genre} · ${movie.year} · ${t('catalog.rating')} ${movie.rating}`;
         this.#hero.style.setProperty(
             '--hero-gradient',
             genreGradient(movie.genre)
@@ -130,9 +131,9 @@ export class ModelTrainingView extends View {
         if (!user) return;
 
         this.#heroProfile.innerHTML =
-            `<i class="bi bi-person-circle"></i> Perfil: ` +
+            `<i class="bi bi-person-circle"></i> ${t('hero.profile')}: ` +
             `<strong>${user.name}</strong>` +
-            `<span class="nf-hero-profile-age"> · ${user.age} anos</span>`;
+            `<span class="nf-hero-profile-age">${t('hero.profileAge', { age: user.age })}</span>`;
     }
 
     renderRecommendations(recommendations, watchedTitles = new Set()) {
@@ -146,7 +147,7 @@ export class ModelTrainingView extends View {
         const html = recommendations.map((movie, index) => {
             const isWatched = watchedTitles.has(movie.title);
             const watchedBadge = isWatched
-                ? '<span class="badge nf-watched-badge">já assistido</span>'
+                ? `<span class="badge nf-watched-badge">${t('rec.watched')}</span>`
                 : '';
             const rank = index < 3
                 ? `<div class="nf-rank">${index + 1}</div>`
@@ -160,7 +161,7 @@ export class ModelTrainingView extends View {
                     <div class="movie-card-overlay">
                         <span class="badge nf-score">${Math.round(movie.score * 100)}%</span>
                         ${watchedBadge}
-                        <button class="btn nf-info-btn" data-idx="${index}" title="Por que este filme?">
+                        <button class="btn nf-info-btn" data-idx="${index}" title="${t('rec.infoTitle')}">
                             <i class="bi bi-info-circle"></i>
                         </button>
                     </div>
@@ -169,7 +170,7 @@ export class ModelTrainingView extends View {
 
         this.#recommendationsList.innerHTML = html;
         this.attachInfoButtons();
-        this.updateHero(recommendations[0], '#1 Recomendado');
+        this.updateHero(recommendations[0], t('hero.badge.top'));
     }
 
     // Abre o modal de explicação do filme clicado
@@ -186,27 +187,25 @@ export class ModelTrainingView extends View {
         const watchedMovies = movie.watchedMovies || [];
 
         this.#infoTitle.innerText = movie.title;
-        this.#infoMeta.innerText = `${movie.genre} · ${movie.year} · nota ${movie.rating}`;
-        this.#infoScore.innerText = `Score do modelo: ${Math.round(movie.score * 100)}%`;
+        this.#infoMeta.innerText = `${movie.genre} · ${movie.year} · ${t('catalog.rating')} ${movie.rating}`;
+        this.#infoScore.innerText = t('rec.score', { p: Math.round(movie.score * 100) });
 
         const reasons = movie.explanation && movie.explanation.length
             ? movie.explanation
-            : [{ text: 'Sem explicação detalhada para este filme.' }];
+            : [{ key: 'en.explain.fallback', params: {} }];
 
         this.#infoReasons.innerHTML = reasons.map((reason, i) => `
             <li class="nf-reason">
                 <span class="nf-reason-num">${i + 1}</span>
-                <span>${reason.text}</span>
+                <span>${t(reason.key, reason.params || {})}</span>
             </li>`).join('');
 
         this.#infoWatched.innerHTML = watchedMovies.length
             ? watchedMovies.map(w => `
                 <span class="nf-chip">${w.title} <span class="nf-chip-meta">${w.genre} · ${w.year}</span></span>`).join('')
-            : '<span class="nf-muted small">Histórico vazio.</span>';
+            : `<span class="nf-muted small">${t('rec.emptyHistory')}</span>`;
 
-        this.#infoNote.innerText =
-            'O score vem da rede neural TensorFlow.js (128→64→32→1) treinada no seu navegador. '
-            + 'O modelo pondera: gênero 0.4 · nota 0.3 · ano 0.2 · idade do público 0.1.';
+        this.#infoNote.innerText = t('rec.note');
 
         this.#infoModal.hidden = false;
     }

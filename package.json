@@ -6,6 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "browser-sync -w . --server --files 'index.html, data/*.json, src/**/*.js' --port 3000",
+        "build": "node scripts/build-static.mjs",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [

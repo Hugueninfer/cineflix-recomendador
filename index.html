@@ -22,17 +22,18 @@
 
             <div class="nf-controls ms-auto d-flex align-items-center gap-2">
                 <label class="nf-perfil-label" for="userSelect">
-                    <i class="bi bi-person-circle me-1"></i> Perfil
+                    <i class="bi bi-person-circle me-1"></i> <span data-i18n="nav.profile">Perfil</span>
                 </label>
                 <select id="userSelect" class="nf-select nf-select-lg" aria-label="Selecionar perfil">
-                    <option value="">-- Escolha um perfil --</option>
+                    <option value="" data-i18n="nav.selectPlaceholder">-- Selecione --</option>
                 </select>
                 <button id="trainModelBtn" class="btn nf-btn-outline">
-                    <i class="bi bi-cpu"></i> Treinar
+                    <i class="bi bi-cpu"></i> <span data-i18n="nav.train">Treinar</span>
                 </button>
                 <button id="runRecommendationBtn" class="btn nf-btn" disabled>
-                    <i class="bi bi-stars"></i> Recomendar
+                    <i class="bi bi-stars"></i> <span data-i18n="nav.recommend">Recomendar</span>
                 </button>
+                <button id="langToggle" class="btn nf-btn-outline nf-lang-toggle" title="Language / Idioma">EN 🇺🇸</button>
             </div>
         </div>
     </header>
@@ -42,18 +43,19 @@
         <section class="nf-hero" id="hero">
             <div class="nf-hero-shade"></div>
             <div class="nf-hero-content container-xl">
-                <div class="nf-hero-badge" id="heroBadge">PRÉVIA</div>
+                <div class="nf-hero-badge" id="heroBadge" data-i18n="hero.badge.preview">PRÉVIA</div>
                 <div class="nf-hero-profile" id="heroProfile">
-                    <i class="bi bi-person-circle"></i> Perfil: <strong id="heroProfileName">carregando...</strong>
+                    <i class="bi bi-person-circle"></i> <span data-i18n="hero.profile">Perfil</span>:
+                    <strong id="heroProfileName">...</strong>
                 </div>
-                <h1 id="heroTitle">Carregando...</h1>
+                <h1 id="heroTitle" data-i18n="hero.loading">Carregando...</h1>
                 <p id="heroMeta" class="nf-hero-meta"></p>
                 <div class="nf-hero-actions">
                     <button id="heroPlay" class="btn nf-btn-play">
-                        <i class="bi bi-play-fill"></i> Assistir
+                        <i class="bi bi-play-fill"></i> <span data-i18n="hero.play">Assistir</span>
                     </button>
                     <button id="heroMore" class="btn nf-btn-more">
-                        <i class="bi bi-info-circle"></i> Recomendar para mim
+                        <i class="bi bi-info-circle"></i> <span data-i18n="hero.recommend">Recomendar para mim</span>
                     </button>
                 </div>
             </div>
@@ -63,14 +65,14 @@
         <section class="nf-panels container-xl">
             <div class="card nf-panel">
                 <div class="card-body">
-                    <h2 class="nf-panel-title">Perfil do usuário</h2>
+                    <h2 class="nf-panel-title"><i class="bi bi-person-badge"></i> <span data-i18n="panels.profileTitle">Perfil do usuário</span></h2>
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label for="userAge" class="form-label nf-label">Idade</label>
+                            <label for="userAge" class="form-label nf-label" data-i18n="panels.age">Idade</label>
                             <input type="number" class="form-control nf-input" id="userAge" disabled>
                         </div>
                         <div class="col-md-9">
-                            <div class="nf-label mb-2">Já assistidos</div>
+                            <div class="nf-label mb-2" data-i18n="panels.watched">Já assistidos</div>
                             <div id="watchedList" class="nf-watched d-grid gap-2"></div>
                         </div>
                     </div>
@@ -79,16 +81,16 @@
 
             <div class="card nf-panel">
                 <div class="card-body">
-                    <h2 class="nf-panel-title"><i class="bi bi-cpu"></i> Treinamento — TensorFlow.js</h2>
+                    <h2 class="nf-panel-title"><i class="bi bi-cpu"></i> <span data-i18n="panels.trainingTitle">Treinamento — TensorFlow.js</span></h2>
 
                     <div class="progress nf-progress" role="progressbar" aria-label="Progresso do treinamento">
                         <div id="trainingProgress" class="progress-bar nf-progress-bar" style="width: 0%">0%</div>
                     </div>
-                    <div id="trainingProgressLabel" class="nf-muted small my-2"></div>
+                    <div id="trainingProgressLabel" class="nf-muted small my-2" data-i18n="panels.progressIdle">Clique em "Treinar" para (re)treinar o modelo.</div>
                     <div id="trainingStats" class="nf-muted small mb-2"></div>
 
                     <details class="mt-1">
-                        <summary class="nf-label small">Logs de treinamento (época / loss / acurácia)</summary>
+                        <summary class="nf-label small" data-i18n="panels.logsSummary">Logs de treinamento (época / loss / acurácia)</summary>
                         <div id="trainingLogs" class="nf-logs mt-2 overflow-auto"></div>
                     </details>
                 </div>
@@ -97,25 +99,25 @@
 
         <!-- Row: recomendados -->
         <section class="nf-row container-xl">
-            <h2 class="nf-row-title">Recomendados para você</h2>
+            <h2 class="nf-row-title" data-i18n="rows.recommended">Recomendados para você</h2>
             <div class="nf-track" id="recommendationsList"></div>
         </section>
 
         <!-- Row: catálogo -->
         <section class="nf-row container-xl">
-            <h2 class="nf-row-title">Catálogo de filmes</h2>
+            <h2 class="nf-row-title" data-i18n="rows.catalog">Catálogo de filmes</h2>
             <div class="nf-track" id="movieList"></div>
         </section>
     </main>
 
     <footer class="nf-footer text-center">
-        <p class="mb-0">Projeto de estudo — arquitetura e ML no navegador (TensorFlow.js + Web Worker)</p>
+        <p class="mb-0" data-i18n="footer.note">Projeto de estudo — arquitetura e ML no navegador (TensorFlow.js + Web Worker)</p>
     </footer>
 
     <!-- Modal: por que este filme foi recomendado? -->
     <div id="infoModal" class="nf-modal-backdrop" hidden>
         <div class="nf-modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
-            <button class="nf-modal-close" aria-label="Fechar">&times;</button>
+            <button class="nf-modal-close" aria-label="Fechar" data-i18n-title="modal.close">&times;</button>
 
             <div class="nf-modal-head">
                 <span id="infoScore" class="badge nf-score"></span>
@@ -123,10 +125,10 @@
                 <p class="nf-muted" id="infoMeta"></p>
             </div>
 
-            <h4 class="nf-label">Por que este filme foi recomendado?</h4>
+            <h4 class="nf-label" data-i18n="rec.infoTitle">Por que este filme foi recomendado?</h4>
             <ul id="infoReasons" class="nf-reasons"></ul>
 
-            <h4 class="nf-label mt-3">Seu histórico (base de dados comparada)</h4>
+            <h4 class="nf-label mt-3" data-i18n="rec.historyTitle">Seu histórico (base de dados comparada)</h4>
             <div id="infoWatched" class="nf-chips"></div>
 
             <p class="nf-muted small mt-3 mb-0" id="infoNote"></p>
