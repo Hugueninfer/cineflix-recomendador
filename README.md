@@ -4,7 +4,6 @@
 >
 > **🔗 Links**
 > - **Produção (Vercel):** https://recomendador-de-filmes-rho.vercel.app
-> - **GitHub Pages:** https://hugueninfer.github.io/cineflix-recomendador/
 > - **Código (GitHub):** https://github.com/Hugueninfer/cineflix-recomendador
 > - Deploy automático: cada push na `main` publica uma nova versão.
 

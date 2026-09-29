@@ -11,7 +11,6 @@ each movie was recommended**, comparing against the dataset.
 > **🌐 Languages:** [Português](README.md) · [English](README.en.md)
 >
 > **🔗 Links**
-> - **Live (GitHub Pages):** https://hugueninfer.github.io/cineflix-recomendador/
 > - **Live (Vercel):** https://recomendador-de-filmes-rho.vercel.app
 > - **Source (GitHub):** https://github.com/Hugueninfer/cineflix-recomendador
 
@@ -60,8 +59,7 @@ Open `http://localhost:3000`. The model **trains automatically** on load
 │  │  └─ WorkerController.js     → main-thread ↔ worker messaging
 │  ├─ view/                      → UserView, MovieView, ModelTrainingView + templates
 │  └─ workers/modelTrainingWorker.js → TF.js neural network (like the gabarito)
-├─ scripts/build-static.mjs      → copies static files to dist/ (Pages)
-└─ .github/workflows/deploy.yml  → builds & publishes to GitHub Pages
+└─ demo.png                      → app screenshot
 ```
 
 ---
