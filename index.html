@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendador de Filmes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- Navbar estilo Netflix -->
+    <header class="nf-nav">
+        <div class="nf-nav-inner container-xl d-flex align-items-center gap-3">
+            <a class="nf-brand" href="#">Cine<span>Flix</span></a>
+
+            <div class="nf-controls ms-auto d-flex align-items-center gap-2">
+                <label class="nf-perfil-label" for="userSelect">
+                    <i class="bi bi-person-circle me-1"></i> Perfil
+                </label>
+                <select id="userSelect" class="nf-select nf-select-lg" aria-label="Selecionar perfil">
+                    <option value="">-- Escolha um perfil --</option>
+                </select>
+                <button id="trainModelBtn" class="btn nf-btn-outline">
+                    <i class="bi bi-cpu"></i> Treinar
+                </button>
+                <button id="runRecommendationBtn" class="btn nf-btn" disabled>
+                    <i class="bi bi-stars"></i> Recomendar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero / destaque: mostra a recomendação #1 -->
+        <section class="nf-hero" id="hero">
+            <div class="nf-hero-shade"></div>
+            <div class="nf-hero-content container-xl">
+                <div class="nf-hero-badge" id="heroBadge">PRÉVIA</div>
+                <div class="nf-hero-profile" id="heroProfile">
+                    <i class="bi bi-person-circle"></i> Perfil: <strong id="heroProfileName">carregando...</strong>
+                </div>
+                <h1 id="heroTitle">Carregando...</h1>
+                <p id="heroMeta" class="nf-hero-meta"></p>
+                <div class="nf-hero-actions">
+                    <button id="heroPlay" class="btn nf-btn-play">
+                        <i class="bi bi-play-fill"></i> Assistir
+                    </button>
+                    <button id="heroMore" class="btn nf-btn-more">
+                        <i class="bi bi-info-circle"></i> Recomendar para mim
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Painéis de perfil e treinamento -->
+        <section class="nf-panels container-xl">
+            <div class="card nf-panel">
+                <div class="card-body">
+                    <h2 class="nf-panel-title">Perfil do usuário</h2>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="userAge" class="form-label nf-label">Idade</label>
+                            <input type="number" class="form-control nf-input" id="userAge" disabled>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="nf-label mb-2">Já assistidos</div>
+                            <div id="watchedList" class="nf-watched d-grid gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card nf-panel">
+                <div class="card-body">
+                    <h2 class="nf-panel-title"><i class="bi bi-cpu"></i> Treinamento — TensorFlow.js</h2>
+
+                    <div class="progress nf-progress" role="progressbar" aria-label="Progresso do treinamento">
+                        <div id="trainingProgress" class="progress-bar nf-progress-bar" style="width: 0%">0%</div>
+                    </div>
+                    <div id="trainingProgressLabel" class="nf-muted small my-2"></div>
+                    <div id="trainingStats" class="nf-muted small mb-2"></div>
+
+                    <details class="mt-1">
+                        <summary class="nf-label small">Logs de treinamento (época / loss / acurácia)</summary>
+                        <div id="trainingLogs" class="nf-logs mt-2 overflow-auto"></div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Row: recomendados -->
+        <section class="nf-row container-xl">
+            <h2 class="nf-row-title">Recomendados para você</h2>
+            <div class="nf-track" id="recommendationsList"></div>
+        </section>
+
+        <!-- Row: catálogo -->
+        <section class="nf-row container-xl">
+            <h2 class="nf-row-title">Catálogo de filmes</h2>
+            <div class="nf-track" id="movieList"></div>
+        </section>
+    </main>
+
+    <footer class="nf-footer text-center">
+        <p class="mb-0">Projeto de estudo — arquitetura e ML no navegador (TensorFlow.js + Web Worker)</p>
+    </footer>
+
+    <!-- Modal: por que este filme foi recomendado? -->
+    <div id="infoModal" class="nf-modal-backdrop" hidden>
+        <div class="nf-modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+            <button class="nf-modal-close" aria-label="Fechar">&times;</button>
+
+            <div class="nf-modal-head">
+                <span id="infoScore" class="badge nf-score"></span>
+                <h3 id="infoTitle"></h3>
+                <p class="nf-muted" id="infoMeta"></p>
+            </div>
+
+            <h4 class="nf-label">Por que este filme foi recomendado?</h4>
+            <ul id="infoReasons" class="nf-reasons"></ul>
+
+            <h4 class="nf-label mt-3">Seu histórico (base de dados comparada)</h4>
+            <div id="infoWatched" class="nf-chips"></div>
+
+            <p class="nf-muted small mt-3 mb-0" id="infoNote"></p>
+        </div>
+    </div>
+
+    <script type="module" src="./src/index.js"></script>
+</body>
+
+</html>
